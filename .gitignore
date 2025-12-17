@@ -1,0 +1,11 @@
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+
+# Entornos virtuales (si los tienes)
+env/
+venv/
+.venv/
+
+# Archivos de sistema
+.DS_Sto
