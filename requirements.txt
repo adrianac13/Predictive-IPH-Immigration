@@ -4,5 +4,6 @@ matplotlib
 seaborn
 scikit-learn
 statsmodels
-jupyter
 ipykernel
+streamlit
+openpyxl

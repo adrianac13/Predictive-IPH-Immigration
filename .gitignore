@@ -1,11 +1,16 @@
-# Archivos de Python compilados
+# --- PYTHON ---
 __pycache__/
 *.py[cod]
+*.pkl
 
-# Entornos virtuales (si los tienes)
+# --- ENTORNOS VIRTUALES ---
 env/
 venv/
 .venv/
 
-# Archivos de sistema
-.DS_Sto
+# --- SISTEMA OPERATIVO (Basura) ---
+.DS_Store
+Thumbs.db
+
+# --- IDE (Configuraciones locales de VS Code) ---
+.vscode/

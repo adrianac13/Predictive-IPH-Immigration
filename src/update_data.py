@@ -8,16 +8,24 @@ from sklearn.pipeline import make_pipeline
 from sklearn.metrics import r2_score, mean_absolute_error
 
 # --- CONFIGURACIÓN ---
-FILE_PATH = 'datasets/dataset_master_final.csv'
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-if not os.path.exists(FILE_PATH):
-    if os.path.exists('dataset_master_final.csv'):
-        FILE_PATH = 'dataset_master_final.csv'
-    else:
-        raise FileNotFoundError(f"No se encuentra {FILE_PATH}")
+# 2. Subimos un nivel para llegar a la raíz del proyecto (PROYECTO/)
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
+# 3. Construimos la ruta a la carpeta datasets
+DATA_DIR = os.path.join(PROJECT_ROOT, 'datasets')
+FILE_MASTER = 'dataset_master_final.csv'
+FULL_PATH = os.path.join(DATA_DIR, FILE_MASTER)
+
+# Verificación de seguridad
+if not os.path.exists(FULL_PATH):
+    raise FileNotFoundError(f"CRÍTICO: No se encuentra el archivo en: {FULL_PATH}")
+
+print(f"Leyendo archivo desde: {FULL_PATH}")
 
 # --- 1. CARGA DE DATOS ---
-df = pd.read_csv(FILE_PATH)
+df = pd.read_csv(FULL_PATH)
 
 col_map = {
     'year': 'Año', 'Year': 'Año',
