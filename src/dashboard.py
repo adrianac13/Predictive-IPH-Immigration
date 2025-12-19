@@ -6,6 +6,7 @@ import os
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
+from matplotlib.ticker import MaxNLocator
 
 # --- CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(page_title="Simulador Vivienda TFM", layout="wide")
@@ -13,13 +14,15 @@ st.set_page_config(page_title="Simulador Vivienda TFM", layout="wide")
 st.title("Simulador Interactivo: Impacto Migratorio en la Vivienda (2026-2030)")
 st.markdown("""
 Con este simulador podemos ver diferentes escenarios personalizados modificando las variables macroeconómicas clave de nuestro país.
-El modelo utiliza un algoritmo **Ridge Regression** ponderado temporalmente ($R^2= 0.84$).
+El modelo utiliza un algoritmo **Ridge Regression** ponderado temporalmente.
+
+**($R^2= 0.84$)**
 """)
 
 # --- 1. CARGA Y ENTRENAMIENTO (Backend invisible) ---
 @st.cache_data # Esto hace que no se recargue el modelo cada vez que tocas un botón
 def load_and_train():
-        # --- CONFIGURACIÓN DE RUTAS ---
+    # --- CONFIGURACIÓN DE RUTAS ---
     # 1. Obtenemos la ruta del script actual (dentro de src/)
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -28,11 +31,7 @@ def load_and_train():
 
     # 3. Definimos las rutas a los datos y resultados desde la raíz
     DATA_DIR = os.path.join(PROJECT_ROOT, 'datasets')
-    RESULTS_DIR = os.path.join(PROJECT_ROOT, 'results')
-
-    # Crear carpeta de resultados si no existe
-    os.makedirs(RESULTS_DIR, exist_ok=True)
-
+    
     FILE_PATH = os.path.join(DATA_DIR, 'dataset_master_final.csv')
     
     if not os.path.exists(FILE_PATH):
@@ -86,7 +85,7 @@ flow_input = st.sidebar.slider(
 
 st.sidebar.subheader("2. Entorno Económico")
 paro_trend = st.sidebar.select_slider(
-    "Tendencia del Paro (Personas desempleadas/año)",
+    "Tendencia del Paro",
     options=["Mejora Fuerte", "Mejora Leve", "Estable", "Empeora Leve", "Crisis"],
     value="Mejora Leve"
 )
@@ -107,6 +106,13 @@ euribor_input = st.sidebar.slider(
     min_value=0.0, max_value=6.0, value=2.5, step=0.1
 )
 
+# --- NUEVO: DISCLAIMER ACADÉMICO ---
+st.sidebar.markdown("---")
+st.sidebar.info(
+    "ℹ️ **Nota Académica:** Esta herramienta es una simulación basada en datos históricos. "
+    "No constituye un asesoramiento financiero."
+)
+
 # --- 3. SIMULACIÓN EN TIEMPO REAL ---
 future_years = [2026, 2027, 2028, 2029, 2030]
 sim_years = [int(last_row['Año'])]
@@ -118,7 +124,10 @@ current_paro = last_row['Paro']
 for year in future_years:
     current_pop += flow_input
     current_paro += paro_delta
-    current_paro = max(4.0, current_paro) # Suelo técnico
+    
+    # --- CORRECCIÓN SUELO DEL PARO ---
+    # Mínimo 1.5 Millones de personas (Paro estructural), no 4.0
+    current_paro = max(1500000, current_paro) 
     
     input_data = pd.DataFrame({
         'Poblacion_Extranjera': [current_pop],
@@ -144,9 +153,14 @@ with col1:
     # Proyección
     ax.plot(sim_years, sim_iph, 'r--', marker='o', linewidth=3, label='Tu Escenario')
     
-    # Estética
+    # --- MEJORA TOOLTIPS/TITULO ---
+    # Usamos formato de miles para que se lea mejor (ej. 400k)
     ax.set_title(f"Impacto: {flow_input:,.0f} inmigrantes/año + Euríbor {euribor_input}%")
     ax.set_ylabel("Índice Precio Vivienda (IPH)")
+    
+    # --- MEJORA EJE X (Años enteros) ---
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    
     ax.grid(True, alpha=0.3)
     ax.legend()
     ax.axvline(x=2025, color='gray', linestyle=':')
@@ -163,7 +177,7 @@ with col2:
     
     st.metric(label="Precio Final (2030)", value=f"{sim_iph[-1]:.1f}", delta=f"{pct_growth:.1f}% acumulado")
     
-    st.write("### Datos Año a Año")
+    st.write("### Datos año a año")
     results_df = pd.DataFrame({'Año': sim_years, 'IPH Predicho': [round(x, 2) for x in sim_iph]})
     st.dataframe(results_df, hide_index=True)
 
