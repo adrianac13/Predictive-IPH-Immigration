@@ -181,5 +181,13 @@ with col2:
     results_df = pd.DataFrame({'Año': sim_years, 'IPH Predicho': [round(x, 2) for x in sim_iph]})
     st.dataframe(results_df, hide_index=True)
 
+# --- 5. DESCARGA DE DATOS ---
+csv = results_df.to_csv(index=False).encode('utf-8')
+st.download_button(
+    label="📥 Descargar datos de esta simulación (CSV)",
+    data=csv,
+    file_name='prediccion_iph_españa.csv',
+    mime='text/csv',
+)
 # Nota al pie
 st.caption("TFM: Análisis del Impacto Demográfico en el Mercado Inmobiliario Español.")
