@@ -86,14 +86,19 @@ flow_input = st.sidebar.slider(
 
 st.sidebar.subheader("2. Entorno Económico")
 paro_trend = st.sidebar.select_slider(
-    "Tendencia del Paro",
+    "Tendencia del Paro (Personas desempleadas/año)",
     options=["Mejora Fuerte", "Mejora Leve", "Estable", "Empeora Leve", "Crisis"],
     value="Mejora Leve"
 )
-# Mapeamos texto a números
+
+# CORRECCIÓN DE ESCALA: Usamos número de personas, no porcentajes.
+# Ejemplo: "Mejora Fuerte" = El paro baja en 200.000 personas cada año.
 paro_map = {
-    "Mejora Fuerte": -0.8, "Mejora Leve": -0.3, "Estable": 0.0, 
-    "Empeora Leve": 0.5, "Crisis": 1.5
+    "Mejora Fuerte": -200000, 
+    "Mejora Leve": -50000, 
+    "Estable": 0, 
+    "Empeora Leve": 100000, 
+    "Crisis": 400000
 }
 paro_delta = paro_map[paro_trend]
 
