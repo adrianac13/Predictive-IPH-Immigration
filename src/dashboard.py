@@ -131,8 +131,10 @@ for i, year in enumerate(future_years):
     sim_years.append(year)
     sim_iph.append(pred)
     
-    # Cálculo del intervalo (se abre ligeramente con el tiempo)
-    uncertainty = std_error * z_score * np.sqrt(i + 1)
+    # Factor 0.6: Asumimos que la volatilidad futura será menor que la histórica (2008)
+    volatility_factor = 0.5 
+    
+    uncertainty = std_error * z_score * np.sqrt(i + 1) * volatility_factor
     ci_upper.append(pred + uncertainty)
     ci_lower.append(pred - uncertainty)
 
